@@ -17,7 +17,7 @@ function getSubdomain() {
   if (host === "qshot.com") {
     return "qshot.qshot.com";
   } else {
-    return getUpdatedUrl();
+    // return getUpdatedUrl();
     return host;
   }
 }
