@@ -18,6 +18,10 @@ function getSubdomain() {
     return "qshot.qshot.com";
   } else {
     // return getUpdatedUrl();
+    // معالجة مؤقتة: تحويل qshot.com إلى quazax.com
+    if (host.includes("qshot.com")) {
+      return host.replace("qshot.com", "quazax.com");
+    }
     return host;
   }
 }
