@@ -18,9 +18,9 @@ function getSubdomain() {
     return "qshot.qshot.com";
   } else {
     // return getUpdatedUrl();
-    // معالجة مؤقتة: تحويل qshot.com إلى quazax.com
-    if (host.includes("qshot.com")) {
-      return host.replace("qshot.com", "quazax.com");
+    // معالجة مؤقتة: تحويل quazax.com إلى qshot.com
+    if (host.includes("quazax.com")) {
+      return host.replace("quazax.com", "qshot.com");
     }
     return host;
   }

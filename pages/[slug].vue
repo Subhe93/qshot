@@ -18,8 +18,8 @@ function getSubdomain() {
     return "qshot.qshot.com";
   } else {
     // return getUpdatedUrl();
-    if (host.includes("qshot.com")) {
-      return host.replace("qshot.com", "quazax.com");
+    if (host.includes("quazax.com")) {
+      return host.replace("quazax.com", "qshot.com");
     }
     return host + url.pathname;
   }
