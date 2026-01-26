@@ -277,9 +277,8 @@ const burgerPosition = computed(() => {
 
 // الحصول على اللوغو مع القيمة الافتراضية
 const logoImage = computed(() => {
-  const logo = accountInfo.value?.data?.user_template_profile?.info?.seo_meta?.image || 
+  const logo =
                accountInfo.value?.data?.user_template_profile?.settings?.logo?.image_url || 
-               accountInfo.value?.data?.user_template_profile?.settings?.profile_picture?.image_url ||
                '/logo-only.svg';
   // إذا كان اللوغو من الـ response (ليس logo-only.svg)، نضيف imageServer، وإلا نستخدم المسار المباشر
   if (logo === '/logo-only.svg') {

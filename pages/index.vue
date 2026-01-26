@@ -221,7 +221,7 @@ function generateBackgroundColor(colorValue) {
 }
 
 function getCoverPhotoAspectRatio(coverPhoto) {
-  if (!coverPhoto) return 'height: 16rem;';
+  if (!coverPhoto) return 'aspect-ratio: 16 / 9;';
   
   const shape = coverPhoto.shape;
   const size = coverPhoto.size;
@@ -235,7 +235,8 @@ function getCoverPhotoAspectRatio(coverPhoto) {
   } else if (shape === 'vertical' || (!shape && size === 'vertical')) {
     return 'aspect-ratio: 9 / 16;';
   } else {
-    return 'height: 16rem;';
+    // الافتراضي horizontal إذا كانت shape و size كلاهما null
+    return 'aspect-ratio: 16 / 9;';
   }
 }
 
@@ -259,9 +260,10 @@ function getProfilePicturePosition(coverPhoto, alignment) {
   }
   
   if (!coverPhoto || !coverPhoto.image_url || coverPhoto.hide === true) {
+    // الافتراضي horizontal: الصورة الشخصية نصفها فوق cover photo والنصف الآخر أسفله  
     return {
       ...basePosition,
-      bottom: '2rem'
+      bottom: 'calc(-1 * clamp(52px, 5vw, 80px))' // نصف ارتفاع الصورة (responsive) - سالب ليظهر خارج cover photo
     };
   }
   
@@ -432,7 +434,7 @@ if (profileImage.value) {
       class="w-full z-0 relative"
       :style="`
         ${getCoverPhotoAspectRatio(coverPhoto)}
-        ${(coverPhoto?.shape === 'horizontal' || (!coverPhoto?.shape && coverPhoto?.size === 'horizontal')) ? 'margin-bottom: clamp(4rem, 3vw, 2rem);' : ''}
+        ${(!coverPhoto?.shape || coverPhoto?.shape === 'horizontal' || (!coverPhoto?.shape && coverPhoto?.size === 'horizontal')) ? 'margin-bottom: clamp(4rem, 3vw, 2rem);' : ''}
       `"
     >
       <!-- Cover Photo Background with Mask -->
@@ -449,14 +451,14 @@ if (profileImage.value) {
           z-index: 0;
         `"
       ></div>
-      <!-- خلفية شفافة عندما لا توجد صورة -->
+   
       <div
         v-else
         class="absolute inset-0 w-full h-full bg-transparent"
         style="z-index: 0;"
       ></div>
       
-      <!-- Profile Picture - خارج الـ mask -->
+      <!-- Profile Picture - outside mask -->
       <div
         v-if="profilePicture?.hide !== true"
         class="inline-block"
@@ -497,9 +499,9 @@ if (profileImage.value) {
         <div class="pl-5 pr-5">
           <h1
             v-if="nameSettings?.hide !== true && nameSettings?.text"
-            class="name_text text-6xl  pt-4"
+            class="name_text text-6xl pt-4"
             :class="{
-              'text-center': nameSettings?.alignment === 'center',
+              'text-center': !nameSettings?.alignment || nameSettings?.alignment === 'center',
               'text-left': nameSettings?.alignment === 'start' || nameSettings?.alignment === 'left',
               'text-right': nameSettings?.alignment === 'end' || nameSettings?.alignment === 'right'
             }"
