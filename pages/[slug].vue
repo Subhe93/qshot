@@ -19,7 +19,7 @@ function getSubdomain() {
   } else {
     // return getUpdatedUrl();
     if (host.includes("quazax.com")) {
-      return host.replace("quazax.com", "qshot.com");
+      return host.replace("quazax.com", "speaknet.app");
     }
     return host + url.pathname;
   }
@@ -48,7 +48,7 @@ const seoMeta = ref({});
 if (subdomainName) {
   // Construct the URL with query parameters
   const params = new URLSearchParams({ name: subdomainName });
-  const url = `https://qshot.radiolingo.app/q-profile/user/test?${params.toString()}`;
+  const url = `https://api.speaknet.app/q-profile/user/test?${params.toString()}`;
 
   // Perform the fetch request
   const { data: fetchedData } = await useFetch(url, {
