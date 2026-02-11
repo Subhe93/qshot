@@ -28,14 +28,14 @@
         v-if="logoAlignment === 'start' || logoAlignment === 'left'"
         class="flex items-center gap-2"
       >
-        <NuxtLink to="/" class="text-white text-lg font-bold flex items-center gap-2">
+        <NuxtLink to="/" class="text-lg font-bold flex items-center gap-2" :style="{ color: headerNameColor }">
           <NuxtImg
             :src="logoImage"
             alt="Logo"
             width="40"
             class="w-10  rounded object-cover"
           />
-          <span v-if="route.path !== '/' && profileName" class="text-white text-lg font-bold">
+          <span v-if="route.path !== '/' && profileName" class="text-lg font-bold">
             {{ profileName }}
           </span>
         </NuxtLink>
@@ -46,14 +46,14 @@
         v-if="logoAlignment === 'center'"
         class="absolute left-1/2 transform -translate-x-1/2"
       >
-        <NuxtLink to="/" class="text-white text-lg font-bold flex items-center gap-2">
+        <NuxtLink to="/" class="text-lg font-bold flex items-center gap-2" :style="{ color: headerNameColor }">
           <NuxtImg
             :src="logoImage"
             alt="Logo"
             width="40"
             class="w-10 h-10 rounded object-cover"
           />
-          <span v-if="route.path !== '/' && profileName" class="text-white text-lg font-bold">
+          <span v-if="route.path !== '/' && profileName" class="text-lg font-bold">
             {{ profileName }}
           </span>
         </NuxtLink>
@@ -64,8 +64,8 @@
         v-if="logoAlignment === 'end' || logoAlignment === 'right'"
         class="flex items-center gap-2"
       >
-        <NuxtLink to="/" class="text-white text-lg font-bold flex items-center gap-2">
-            <span v-if="route.path !== '/' && profileName" class="text-white text-lg font-bold">
+        <NuxtLink to="/" class="text-lg font-bold flex items-center gap-2" :style="{ color: headerNameColor }">
+            <span v-if="route.path !== '/' && profileName" class="text-lg font-bold">
             {{ profileName }}
           </span>
           <NuxtImg
@@ -171,6 +171,7 @@ interface AccountInfo {
         };
       };
       settings: {
+        font_color?: number;
         name?: {
           text: string;
         };
@@ -244,6 +245,15 @@ const profileName = computed(() => {
                 accountInfo.value?.data?.user_template_profile?.settings?.name?.text || 
                 accountInfo.value?.data?.user_template_profile?.name || '';
   return title.split('|')[0].trim();
+});
+
+// لون اسم الملف في الهيدر من settings.font_color
+const headerNameColor = computed(() => {
+  const fontColor = accountInfo.value?.data?.user_template_profile?.settings?.font_color;
+  if (fontColor != null) {
+    return numberToHexText(fontColor);
+  }
+  return 'rgb(255, 255, 255)';
 });
 
 // تحديد محاذاة اللوغو من الإعدادات

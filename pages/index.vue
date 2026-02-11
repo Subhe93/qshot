@@ -31,8 +31,8 @@ function getUpdatedUrl() {
   const path = url.pathname;
   if (host.includes("localhost")) {
     const subdomain = host.split(".")[0];
-    console.log(`${subdomain}.qshot.com${path.slice(0, -1)}`);
-    return `${subdomain}.qshot.com${path.slice(0, -1)}`;
+    console.log(`${subdomain}.speaknet.app${path.slice(0, -1)}`);
+    return `${subdomain}.speaknet.app${path.slice(0, -1)}`;
   }
 }
 
@@ -149,6 +149,10 @@ const profileImageUrl = computed(() => {
   }
   return imageServer + profileImage.value;
 });
+// لون النص الافتراضي من settings.font_color (للتوريث على كل النص داخل الصفحة)
+const pageFontColorRgb = computed(() =>
+  textColor.value != null ? numberToHexText(textColor.value) : 'rgb(255, 255, 255)'
+);
 
 // Computed properties للـ useHead
 const fontUrl = computed(() => `https://fonts.googleapis.com/css2?family=${fontName.value}:wght@100;200;300;400&display=swap`);
@@ -298,21 +302,11 @@ function getProfilePicturePosition(coverPhoto, alignment) {
   }
 }
 function updateStyles(bgColor, textColor) {
-  document.querySelectorAll("*").forEach((el) => {
-    // Skip elements with custom colors (name, bio, etc.)
-    if (el.classList.contains('name_text') || el.classList.contains('bio_text') || el.hasAttribute('data-custom-color')) {
-      return;
-    }
-    // Skip elements that already have inline color style
-    if (el.style.color && el.style.color !== '') {
-      return;
-    }
-    el.style.color = textColor;
-  });
+  // لون النص يُطبَّق عبر متغير CSS --page-font-color على الـ section (لا نعتمد على querySelectorAll لتفادي مشكلة توقيت ClientOnly)
   if (!backgroundSettings.value?.image) {
     document.body.style.background = bgColor;
   }
-  // Add/update placeholder styles
+  // placeholders للحقول
   let placeholderStyle = document.getElementById("dynamic-placeholder-style");
   if (!placeholderStyle) {
     placeholderStyle = document.createElement("style");
@@ -417,7 +411,7 @@ if (profileImage.value) {
 <template>
   <section
     class="relative bg-cover min-h-screen bg-fixed bg-center hero-bg overflow-hidden w-full max-w-2xl border border-white/10 bg-zinc-900/80 backdrop-blur-3xl md:rounded-xl shadow-md"
-    :style="
+    :style="[
       backgroundSettings?.image
         ? 'background-image: url(' +
           (backgroundSettings.image === '/wallpaper.jpg'
@@ -425,8 +419,9 @@ if (profileImage.value) {
             : imageServer) +
           backgroundSettings.image +
           ')'
-        : 'background:' + numberToHex(bgColor) + ';'
-    "
+        : 'background:' + numberToHex(bgColor) + ';',
+      { '--page-font-color': pageFontColorRgb }
+    ]"
   >
     <!-- Cover Photo -->
     <div
@@ -458,7 +453,7 @@ if (profileImage.value) {
         style="z-index: 0;"
       ></div>
       
-      <!-- Profile Picture - outside mask -->
+      <!-- Profile Picture - outside mask (when cover is visible) -->
       <div
         v-if="profilePicture?.hide !== true"
         class="inline-block"
@@ -470,6 +465,31 @@ if (profileImage.value) {
         :style="{
           ...getProfilePicturePosition(coverPhoto, profilePicture?.alignment),
           border: profilePicture?.border_width ? `${profilePicture.border_width}px solid ${profilePicture.border_color ? numberToHexText(profilePicture.border_color) : 'transparent'}` : undefined
+        }"
+      >
+        <HomeProfilePicture
+          :image="profilePicture?.image_url ? imageServer + profilePicture.image_url : '/person.svg'"
+          :shape="profilePicture?.shape || 'circle'"
+        />
+      </div>
+    </div>
+    <!-- عندما الكفر مخفي: نحافظ على نفس ارتفاع horizontal حتى لو الصورة الشخصية مخفية -->
+    <div
+      v-else
+      class="w-full z-0 relative"
+      style="aspect-ratio: 16 / 9; margin-bottom: clamp(4rem, 3vw, 2rem);"
+    >
+      <div
+        v-if="profilePicture?.hide !== true"
+        class="inline-block absolute"
+        :class="{
+          'rounded-full': (profilePicture?.shape || 'circle') === 'circle',
+          'rounded-lg': profilePicture?.shape === 'rectangle',
+          'rounded-lg': profilePicture?.shape === 'square'
+        }"
+        :style="{
+          ...getProfilePicturePosition(null, profilePicture?.alignment),
+          ...(profilePicture?.border_width ? { border: `${profilePicture.border_width}px solid ${profilePicture.border_color ? numberToHexText(profilePicture.border_color) : 'transparent'}` } : {})
         }"
       >
         <HomeProfilePicture
@@ -505,7 +525,7 @@ if (profileImage.value) {
               'text-left': nameSettings?.alignment === 'start' || nameSettings?.alignment === 'left',
               'text-right': nameSettings?.alignment === 'end' || nameSettings?.alignment === 'right'
             }"
-            :style="nameSettings?.color ? `color: ${numberToHexText(nameSettings.color)} !important;` : ''"
+            :style="`color: ${numberToHexText(nameSettings?.color != null ? nameSettings.color : (textColor ?? 16777215))} !important;`"
           >
             {{ nameSettings.text }}
             <NuxtImg
@@ -517,7 +537,7 @@ if (profileImage.value) {
           <h2
             v-if="(typeof bioSettings === 'string' ? bioSettings : bioSettings?.text) && bioSettings?.hide !== true"
             class="bio_text text-2xl text-center pr-4 pl-4 pt-4"
-            :style="(typeof bioSettings === 'object' && bioSettings?.color) ? `color: ${numberToHexText(bioSettings.color)} !important;` : ''"
+            :style="`color: ${numberToHexText((typeof bioSettings === 'object' && bioSettings?.color != null) ? bioSettings.color : (textColor ?? 16777215))} !important;`"
           >
             <span
               v-html="
@@ -553,6 +573,12 @@ if (profileImage.value) {
   </section>
 </template>
 <style scoped>
+/* لون النص الافتراضي من settings.font_color لجميع المحتوى داخل الصفحة (بما فيه ClientOnly والـ modules) */
+/* تجاهل دارك/لايت مود الجهاز واستخدام ألوان الصفحة فقط */
+.hero-bg {
+  color: var(--page-font-color);
+  color-scheme: normal;
+}
 .bio_text {
   opacity: 0.8;
 }

@@ -31,9 +31,9 @@ function getUpdatedUrl() {
   const path = url.pathname;
   if (host.includes("localhost")) {
     const subdomain = host.split(".")[0];
-    console.log(`${subdomain}.qshot.com${path.slice(0, -1)}`);
-    return `${subdomain}.qshot.com${path}`;
-    return `${subdomain}.qshot.com${path.slice(0, -1)}`;
+    console.log(`${subdomain}.speaknet.app${path.slice(0, -1)}`);
+    return `${subdomain}.speaknet.app${path}`;
+    return `${subdomain}.speaknet.app${path.slice(0, -1)}`;
   }
 }
 
@@ -114,8 +114,8 @@ if (subdomainName) {
     }
   }
   textColor.value =
-    fetchedData.value.data.user_template_profile.settings.font_color;
-  
+    fetchedData.value.data.user_template_profile.settings.font_color || 16777215; // default white if null
+
   //meta - check if seo_meta exists in info, otherwise use settings
   // bio is now an object with text and hide properties
   const bioText = typeof data.value.data.user_template_profile.settings.bio === 'string'
@@ -143,6 +143,11 @@ const seoImageUrl = computed(() => {
   }
   return imageServer + seoMeta.value.image;
 });
+
+// لون النص الافتراضي من settings.font_color (للتوريث على كل النص داخل الصفحة)
+const pageFontColorRgb = computed(() =>
+  textColor.value != null ? numberToHexText(textColor.value) : 'rgb(255, 255, 255)'
+);
 
 //load font
 const fontName = computed(() => settings.value?.font_family || 'Inter');
@@ -206,14 +211,11 @@ function generateBackgroundColor(colorValue) {
   }
 }
 function updateStyles(bgColor, textColor) {
-  document.querySelectorAll("*").forEach((el) => {
-    el.style.color = textColor;
-  });
+  // لون النص يُطبَّق عبر متغير CSS --page-font-color على الـ section (لا نعتمد على querySelectorAll لتفادي مشكلة توقيت ClientOnly)
   if (!backgroundSettings.value?.image) {
     document.body.style.background = bgColor;
   }
-
-  // Add/update placeholder styles
+  // placeholders للحقول
   let placeholderStyle = document.getElementById("dynamic-placeholder-style");
   if (!placeholderStyle) {
     placeholderStyle = document.createElement("style");
@@ -288,7 +290,7 @@ if (seoMeta.value.image) {
 <template>
   <section
     class="relative bg-cover min-h-screen bg-fixed bg-center hero-bg overflow-hidden w-full max-w-2xl border border-white/10 bg-zinc-900/80 backdrop-blur-3xl md:rounded-xl shadow-md"
-    :style="
+    :style="[
       backgroundSettings?.image
         ? 'background-image: url(' +
           (backgroundSettings.image === '/wallpaper.jpg'
@@ -296,8 +298,9 @@ if (seoMeta.value.image) {
             : imageServer) +
           backgroundSettings.image +
           ')'
-        : 'background:' + numberToHex(bgColor) + ';'
-    "
+        : 'background:' + numberToHex(bgColor) + ';',
+      { '--page-font-color': pageFontColorRgb }
+    ]"
   >
     <HomeNavbar :pages_list="pagesList"></HomeNavbar>
     <!-- grid -->
@@ -369,6 +372,12 @@ if (seoMeta.value.image) {
   </section>
 </template>
 <style scoped>
+/* لون النص الافتراضي من settings.font_color لجميع المحتوى داخل الصفحة */
+/* تجاهل دارك/لايت مود الجهاز واستخدام ألوان الصفحة فقط */
+.hero-bg {
+  color: var(--page-font-color);
+  color-scheme: normal;
+}
 .bio_text {
   opacity: 0.8;
 }
