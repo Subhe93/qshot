@@ -6,9 +6,9 @@
   ></div> -->
   
   <div
+    v-if="headerVisible"
     class="w-full absolute z-12 top-0 left-0 p-5"
     style="z-index: 12"
-    
   >
     <!-- Navbar Wrapper -->
     <div 
@@ -30,12 +30,13 @@
       >
         <NuxtLink to="/" class="text-lg font-bold flex items-center gap-2" :style="{ color: headerNameColor }">
           <NuxtImg
+            v-if="logoImage"
             :src="logoImage"
             alt="Logo"
             width="40"
             class="w-10  rounded object-cover"
           />
-          <span v-if="route.path !== '/' && profileName" class="text-lg font-bold">
+          <span v-if="route.path !== '/' && profileName && !nameHiddenInHeader" class="text-lg font-bold">
             {{ profileName }}
           </span>
         </NuxtLink>
@@ -48,12 +49,13 @@
       >
         <NuxtLink to="/" class="text-lg font-bold flex items-center gap-2" :style="{ color: headerNameColor }">
           <NuxtImg
+            v-if="logoImage"
             :src="logoImage"
             alt="Logo"
             width="40"
             class="w-10 h-10 rounded object-cover"
           />
-          <span v-if="route.path !== '/' && profileName" class="text-lg font-bold">
+          <span v-if="route.path !== '/' && profileName && !nameHiddenInHeader" class="text-lg font-bold">
             {{ profileName }}
           </span>
         </NuxtLink>
@@ -65,10 +67,11 @@
         class="flex items-center gap-2"
       >
         <NuxtLink to="/" class="text-lg font-bold flex items-center gap-2" :style="{ color: headerNameColor }">
-            <span v-if="route.path !== '/' && profileName" class="text-lg font-bold">
+            <span v-if="route.path !== '/' && profileName && !nameHiddenInHeader" class="text-lg font-bold">
             {{ profileName }}
           </span>
           <NuxtImg
+            v-if="logoImage"
             :src="logoImage"
             alt="Logo"
             width="40"
@@ -78,8 +81,8 @@
         </NuxtLink>
       </div>
 
-      <!-- Burger Menu - Start/Left: يمين | Center: يمين | End/Right: يسار -->
-      <div>
+      <!-- Burger Menu - يخفى إذا لا توجد روابط غير الرئيسية -->
+      <div v-if="sortedArray.length > 0">
         <button
           class="flex p-2 flex-col justify-center items-center group"
           @click="toggleMenu"
@@ -126,8 +129,9 @@
       </div> -->
     </div>
 
-    <!-- Mobile Dropdown Menu -->
+    <!-- Mobile Dropdown Menu - يخفى إذا لا توجد روابط غير الرئيسية -->
     <div
+      v-if="sortedArray.length > 0"
       v-show="isOpen"
       class="mt-3 flex flex-col gap-2 border-[1px] border-[#ffffff20] rounded-xl p-4"
       style="backdrop-filter: blur(20px); background: #00000050"
@@ -174,10 +178,12 @@ interface AccountInfo {
         font_color?: number;
         name?: {
           text: string;
+          hide?: boolean;
         };
         logo?: {
-          image_url: string;
+          image_url: string | null;
           alignment?: 'left' | 'center' | 'right' | 'start' | 'end';
+          hide?: boolean;
         };
         header?: {
           logo_alignment?: 'left' | 'center' | 'right' | 'start' | 'end';
@@ -201,6 +207,18 @@ const isOpen = ref(false);
 const toggleMenu = () => {
   isOpen.value = !isOpen.value;
 };
+
+// إظهار/إخفاء الهيدر حسب settings.header.hide
+const headerVisible = computed(() => {
+  const hide = accountInfo.value?.data?.user_template_profile?.settings?.header?.hide;
+  return hide !== true;
+});
+
+// إخفاء الاسم في الهيدر حسب settings.name.hide
+const nameHiddenInHeader = computed(() => {
+  const hide = accountInfo.value?.data?.user_template_profile?.settings?.name?.hide;
+  return hide === true;
+});
 
 // دالة لتحويل رقم اللون إلى RGB
 function numberToHexText(num: number) {
@@ -285,16 +303,19 @@ const burgerPosition = computed(() => {
   }
 });
 
-// الحصول على اللوغو مع القيمة الافتراضية
+// الحصول على اللوغو أو الصورة الشخصية — مع احترام logo.hide وعدم عرض صورة افتراضية
 const logoImage = computed(() => {
-  const logo =
-               accountInfo.value?.data?.user_template_profile?.settings?.logo?.image_url || 
-               '/logo-only.svg';
-  // إذا كان اللوغو من الـ response (ليس logo-only.svg)، نضيف imageServer، وإلا نستخدم المسار المباشر
-  if (logo === '/logo-only.svg') {
-    return logo;
+  const settings = accountInfo.value?.data?.user_template_profile?.settings;
+  const logoHide = settings?.logo?.hide === true;
+  const logoUrl = settings?.logo?.image_url;
+  const profilePictureUrl = settings?.profile_picture?.image_url;
+  if (!logoHide && logoUrl) {
+    return imageServer + logoUrl;
   }
-  return imageServer + logo;
+  if (profilePictureUrl) {
+    return imageServer + profilePictureUrl;
+  }
+  return null; // إخفاء الصورة الافتراضية عند عدم توفر لوغو أو صورة شخصية
 });
 </script>
 

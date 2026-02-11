@@ -167,7 +167,7 @@ const jsonLd = computed(() => JSON.stringify({
   "@type": "WebPage",
   name: userName.value,
   description: userBio.value,
-  ...(profileImage.value ? { image: profileImageUrl.value } : {}),
+  ...(profileImage.value && profileImage.value !== '/logo-only.svg' ? { image: profileImageUrl.value } : {}),
   url: url.origin,
 }));
 
@@ -337,7 +337,7 @@ useHead({
       rel: "stylesheet",
       href: fontUrl,
     },
-    ...(profileImage.value ? [
+    ...(profileImage.value && profileImage.value !== '/logo-only.svg' ? [
       {
         rel: "icon",
         type: "image/png",
@@ -395,10 +395,10 @@ useSeoMeta({
   twitterCard: "summary_large_image",
   twitterSite: () => userName.value,
   twitterCreator: () => userName.value,
-  ...(profileImage.value ? { twitterImage: () => profileImageUrl.value } : {}),
+  ...(profileImage.value && profileImage.value !== '/logo-only.svg' ? { twitterImage: () => profileImageUrl.value } : {}),
 });
 
-if (profileImage.value) {
+if (profileImage.value && profileImage.value !== '/logo-only.svg') {
   defineOgImage({
     url: profileImageUrl.value,
     width: 1200,
@@ -453,9 +453,9 @@ if (profileImage.value) {
         style="z-index: 0;"
       ></div>
       
-      <!-- Profile Picture - outside mask (when cover is visible) -->
+      <!-- Profile Picture - outside mask (when cover is visible)؛ إخفاء عند عدم توفر صورة -->
       <div
-        v-if="profilePicture?.hide !== true"
+        v-if="profilePicture?.hide !== true && (profilePicture?.image_url || settings?.logo?.image_url)"
         class="inline-block"
         :class="{
           'rounded-full': (profilePicture?.shape || 'circle') === 'circle',
@@ -468,7 +468,7 @@ if (profileImage.value) {
         }"
       >
         <HomeProfilePicture
-          :image="profilePicture?.image_url ? imageServer + profilePicture.image_url : '/person.svg'"
+          :image="(profilePicture?.image_url ? imageServer + profilePicture.image_url : (settings?.logo?.image_url ? imageServer + settings.logo.image_url : '/person.svg'))"
           :shape="profilePicture?.shape || 'circle'"
         />
       </div>
@@ -480,7 +480,7 @@ if (profileImage.value) {
       style="aspect-ratio: 16 / 9; margin-bottom: clamp(4rem, 3vw, 2rem);"
     >
       <div
-        v-if="profilePicture?.hide !== true"
+        v-if="profilePicture?.hide !== true && (profilePicture?.image_url || settings?.logo?.image_url)"
         class="inline-block absolute"
         :class="{
           'rounded-full': (profilePicture?.shape || 'circle') === 'circle',
@@ -493,7 +493,7 @@ if (profileImage.value) {
         }"
       >
         <HomeProfilePicture
-          :image="profilePicture?.image_url ? imageServer + profilePicture.image_url : '/person.svg'"
+          :image="(profilePicture?.image_url ? imageServer + profilePicture.image_url : (settings?.logo?.image_url ? imageServer + settings.logo.image_url : '/person.svg'))"
           :shape="profilePicture?.shape || 'circle'"
         />
       </div>
