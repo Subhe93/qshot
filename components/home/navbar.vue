@@ -303,19 +303,13 @@ const burgerPosition = computed(() => {
   }
 });
 
-// الحصول على اللوغو أو الصورة الشخصية — مع احترام logo.hide وعدم عرض صورة افتراضية
+// عرض صورة الهيدر فقط عند توفر اللوغو — لا نعرض الصورة الشخصية مكان اللوغو
 const logoImage = computed(() => {
   const settings = accountInfo.value?.data?.user_template_profile?.settings;
-  const logoHide = settings?.logo?.hide === true;
+  if (settings?.logo?.hide === true) return null;
   const logoUrl = settings?.logo?.image_url;
-  const profilePictureUrl = settings?.profile_picture?.image_url;
-  if (!logoHide && logoUrl) {
-    return imageServer + logoUrl;
-  }
-  if (profilePictureUrl) {
-    return imageServer + profilePictureUrl;
-  }
-  return null; // إخفاء الصورة الافتراضية عند عدم توفر لوغو أو صورة شخصية
+  if (!logoUrl) return null;
+  return imageServer + logoUrl;
 });
 </script>
 
