@@ -6,6 +6,10 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const visibleLinks = computed(() =>
+  (props.socials?.links || []).filter((link) => !link.hidden)
+);
+
 function capitalizeFirstLetter(str: string) {
   if (props.socials.icon_type === "original") {
     return str.charAt(0).toUpperCase() + str.slice(1) + "-color";
@@ -192,9 +196,9 @@ function formatSocialMediaLink(platform, input) {
 </script>
 
 <template>
-  <div class="my-7 lg:w-50 w-100 pl-4 pr-4 gap-6 sm:gap-10">
+  <div class="my-7 lg:w-50 w-100  gap-5 sm:gap-10">
     <div
-      class="gridAlignCenter flex items-center justify-center w-full"
+      class="social-slider-start flex items-center justify-start w-full"
       v-if="props.socials.layout_type === 'layoutSlider'"
     >
       <Swiper
@@ -213,31 +217,21 @@ function formatSocialMediaLink(platform, input) {
             translate: ['100%', 0, 0],
           },
         }"
-        :breakpoints="{
-          '200': {
-            slidesPerView:
-              props.socials.links.length <= 4 ? props.socials.links.length : 4,
-            spaceBetween: 5,
-          },
-          '768': {
-            slidesPerView:
-              props.socials.links.length <= 7 ? props.socials.links.length : 7,
-            spaceBetween: 50,
-          },
-          '1024': {
-            slidesPerView: props.socials.links.length,
-            spaceBetween: 10,
-          },
-        }"
+        :slides-per-view="'auto'"
+        :space-between="12"
       >
-        <SwiperSlide v-for="social in props.socials.links" :key="social.type">
+        <SwiperSlide
+          v-for="social in visibleLinks"
+          :key="social.id ?? social.type"
+          class="social-slide-fixed"
+        >
           <NuxtLink
             v-track-click="{
               moduleType: 'SocialLinksModule',
               moduleName: social.type,
             }"
             target="_blank"
-            class="flex items-center justify-center"
+            class="flex items-center justify-start"
             :aria-label="'Go to ' + social.type + ' profile'"
             :to="formatSocialMediaLink(social.type, social.link)"
           >
@@ -270,7 +264,7 @@ function formatSocialMediaLink(platform, input) {
       class="gridAlignStart"
       v-if="props.socials.layout_type === 'gridAlignStart'"
     >
-      <div v-for="social in props.socials.links" :key="social.type">
+      <div v-for="social in visibleLinks" :key="social.id ?? social.type">
         <NuxtLink
           v-track-click="{
             moduleType: 'SocialLinksModule',
@@ -309,7 +303,7 @@ function formatSocialMediaLink(platform, input) {
       class="gridAlignEnd"
       v-if="props.socials.layout_type === 'gridAlignEnd'"
     >
-      <div v-for="social in props.socials.links" :key="social.type">
+      <div v-for="social in visibleLinks" :key="social.id ?? social.type">
         <NuxtLink
           v-track-click="{
             moduleType: 'SocialLinksModule',
@@ -348,7 +342,7 @@ function formatSocialMediaLink(platform, input) {
       class="gridAlignCenter"
       v-if="props.socials.layout_type === 'gridAlignCenter'"
     >
-      <div v-for="social in props.socials.links" :key="social.type">
+      <div v-for="social in visibleLinks" :key="social.id ?? social.type">
         <NuxtLink
           v-track-click="{
             moduleType: 'SocialLinksModule',
@@ -383,15 +377,109 @@ function formatSocialMediaLink(platform, input) {
         </NuxtLink>
       </div>
     </div>
+    <div
+      class="grid grid-cols-[repeat(3,auto)] min-[360px]:grid-cols-[repeat(4,auto)] md:grid-cols-[repeat(auto-fill,minmax(5rem,auto))] gap-3 min-[390px]:gap-5 w-full justify-center justify-items-center max-w-full mx-auto"
+      v-if="props.socials.layout_type === 'grid'"
+    >
+      <div
+        v-for="social in visibleLinks"
+        :key="social.id ?? social.type"
+        class="flex flex-col items-center gap-2"
+      >
+        <NuxtLink
+          v-track-click="{
+            moduleType: 'SocialLinksModule',
+            moduleName: social.type,
+          }"
+          target="_blank"
+          class="flex flex-col items-center gap-2"
+          :aria-label="'Go to ' + social.type + ' profile'"
+          :to="formatSocialMediaLink(social.type, social.link)"
+        >
+          <component
+            v-if="!social.icon"
+            :is="'Svgo' + capitalizeFirstLetter(social.type)"
+            class="social-item size-[4.75rem] bg-black p-4 rounded-md transition-all duration-300 hover:text-main shrink-0"
+            :font-controlled="false"
+            :alt="social.type + ' logo'"
+            :aria-label="social.type + ' logo'"
+            :class="{
+              'social-item-color': props.socials.icon_type === 'original',
+              'social-item': props.socials.icon_type === 'darkFilled',
+            }"
+          />
+          <img
+            v-else
+            :src="ImageServer + social.icon"
+            class="social-item social-item-color size-[4.75rem] bg-black p-4 rounded-md transition-all duration-300 hover:text-main shrink-0"
+            :font-controlled="false"
+            :alt="social.type + ' logo'"
+            :aria-label="social.type + ' logo'"
+          />
+          <span class="text-cyan-400 text-sm font-medium text-center">
+            {{ social.type.charAt(0).toUpperCase() + social.type.slice(1) }}
+          </span>
+        </NuxtLink>
+      </div>
+    </div>
+    <div
+      class="flex flex-col gap-3 w-full"
+      v-if="props.socials.layout_type === 'list'"
+    >
+      <div v-for="social in visibleLinks" :key="social.id ?? social.type">
+        <NuxtLink
+          v-track-click="{
+            moduleType: 'SocialLinksModule',
+            moduleName: social.type,
+          }"
+          target="_blank"
+          class="flex items-center gap-3"
+          :aria-label="'Go to ' + social.type + ' profile'"
+          :to="formatSocialMediaLink(social.type, social.link)"
+        >
+          <component
+            v-if="!social.icon"
+            :is="'Svgo' + capitalizeFirstLetter(social.type)"
+            class="social-item size-10 bg-black p-2 rounded-md transition-all duration-300 hover:text-main shrink-0"
+            :font-controlled="false"
+            :alt="social.type + ' logo'"
+            :aria-label="social.type + ' logo'"
+            :class="{
+              'social-item-color': props.socials.icon_type === 'original',
+              'social-item': props.socials.icon_type === 'darkFilled',
+            }"
+          />
+          <img
+            v-else
+            :src="ImageServer + social.icon"
+            class="social-item social-item-color size-10 bg-black p-2 rounded-md transition-all duration-300 hover:text-main shrink-0"
+            :font-controlled="false"
+            :alt="social.type + ' logo'"
+            :aria-label="social.type + ' logo'"
+          />
+          <span class="capitalize">
+            {{ social.type.charAt(0).toUpperCase() + social.type.slice(1) }}
+          </span>
+        </NuxtLink>
+      </div>
+    </div>
   </div>
 </template>
 <style scoped>
 .swiper {
   max-width: 100%;
+  margin-left: 0;
+}
+@media (min-width: 1024px) {
+  .swiper {
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 .social-item {
   background-color: #000 !important;
   color: rgb(255, 255, 255) !important;
+  fill: rgb(255, 255, 255) !important;
   border-radius: 10px !important;
   overflow: hidden;
 }
@@ -400,7 +488,14 @@ function formatSocialMediaLink(platform, input) {
   color: unset !important;
   padding: 0;
 }
-.social-item-color * {
+/* .social-item-color * {
   fill: revert-layer;
+} */
+.social-slider-start :deep(.swiper-wrapper) {
+  justify-content: flex-start;
+}
+.social-slider-start :deep(.social-slide-fixed) {
+  width: auto;
+  flex-shrink: 0;
 }
 </style>

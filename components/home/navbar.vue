@@ -208,10 +208,14 @@ const toggleMenu = () => {
   isOpen.value = !isOpen.value;
 };
 
-// إظهار/إخفاء الهيدر حسب settings.header.hide
+// إظهار/إخفاء الهيدر: يُخفى إذا كان مخفياً من الإعدادات، أو إذا لا توجد صفحات فرعية ولا لوغو (لتجنب هيدر فارغ)
 const headerVisible = computed(() => {
   const hide = accountInfo.value?.data?.user_template_profile?.settings?.header?.hide;
-  return hide !== true;
+  if (hide === true) return false;
+  const hasSubPages = sortedArray.value.length > 0;
+  const hasLogo = !!logoImage.value;
+  if (!hasSubPages && !hasLogo) return false;
+  return true;
 });
 
 // إخفاء الاسم في الهيدر حسب settings.name.hide

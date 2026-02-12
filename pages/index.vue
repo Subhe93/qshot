@@ -17,7 +17,7 @@ function getSubdomain() {
   if (host === "qshot.com") {
     return "qshot.qshot.com";
   } else {
-    // return getUpdatedUrl();
+    return getUpdatedUrl();
     // معالجة مؤقتة: تحويل quazax.com إلى qshot.com
     if (host.includes("quazax.com")) {
       return host.replace("quazax.com", "speaknet.app");
@@ -477,7 +477,7 @@ if (profileImage.value && profileImage.value !== '/logo-only.svg') {
     <div
       v-else
       class="w-full z-0 relative"
-      style="aspect-ratio: 16 / 9; margin-bottom: clamp(4rem, 3vw, 2rem);"
+      style="aspect-ratio: 22 / 9; margin-bottom: clamp(4rem, 3vw, 2rem);"
     >
       <div
         v-if="profilePicture?.hide !== true && (profilePicture?.image_url || settings?.logo?.image_url)"
