@@ -41,7 +41,7 @@
             :src="logoImage"
             alt="Logo"
             width="40"
-            class="w-10 h-10 rounded object-cover"
+            class="w-8 h-8 rounded object-cover"
           />
           <span v-if="route.path !== '/' && profileName && !nameHiddenInHeader" class="text-lg font-bold">
             {{ profileName }}
@@ -62,7 +62,7 @@
             :src="logoImage"
             alt="Logo"
             width="40"
-            class="w-10 h-10 rounded object-cover"
+            class="w-8 h-8 rounded object-cover"
           />
         </NuxtLink>
       </div>
@@ -70,6 +70,7 @@
       <div v-if="sortedArray.length > 0">
         <button
           class="flex p-2 flex-col justify-center items-center group"
+          :style="{ color: headerNameColor }"
           @click="toggleMenu"
         >
           <span
@@ -110,7 +111,7 @@
       </NuxtLink>
       <NuxtLink
         v-for="item in sortedArray"
-        :key="item.id"
+        :key="item._id || item.id"
         :to="'/' + item.urlName"
         class="nav-icon text-white p-2 group"
         :class="{ 'active-route': route.path === '/' + item.urlName }"
@@ -161,7 +162,7 @@ const toggleMenu = () => {
 
 const props = defineProps({
   pages_list: {
-    type: Array as () => Array<{ id: number; urlName: string; listName: string; order: number }>,
+    type: Array as () => Array<{ id?: number; _id?: string; urlName: string; listName: string; order: number }>,
     required: true,
   },
 });

@@ -13,28 +13,43 @@
       }"
       :style="headerBarStyle"
     >
-      <!-- Title from header_text (e.g. Brand Name) - alignment from header.leading_alignment -->
+      <!-- Logo + Title (header.title أو header_text) - alignment from header.leading_alignment -->
       <NuxtLink
         v-if="titleAlignment === 'start' || titleAlignment === 'left' || titleAlignment === 'end' || titleAlignment === 'right'"
         to="/"
-        class="text-lg font-bold"
+        class="flex items-center gap-2 text-lg font-bold"
         :style="{ color: headerTextColor }"
       >
-        {{ headerTitle }}
+        <NuxtImg
+          v-if="logoImage"
+          :src="logoImage"
+          alt="Logo"
+          width="40"
+          class="w-8 h-8 rounded object-cover shrink-0"
+        />
+        <span v-if="headerTitle">{{ headerTitle }}</span>
       </NuxtLink>
       <NuxtLink
         v-if="titleAlignment === 'center'"
         to="/"
-        class="absolute left-1/2 -translate-x-1/2 text-lg font-bold"
+        class="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 text-lg font-bold"
         :style="{ color: headerTextColor }"
       >
-        {{ headerTitle }}
+        <NuxtImg
+          v-if="logoImage"
+          :src="logoImage"
+          alt="Logo"
+          width="40"
+          class="w-8 h-8 rounded object-cover shrink-0"
+        />
+        <span v-if="headerTitle">{{ headerTitle }}</span>
       </NuxtLink>
 
-      <!-- Burger Menu when sub-pages exist -->
+      <!-- Burger Menu when sub-pages exist - لون الخط كالنص في الهيدر -->
       <div v-if="sortedArray.length > 0">
         <button
           class="flex p-2 flex-col justify-center items-center group"
+          :style="{ color: headerTextColor }"
           @click="toggleMenu"
         >
           <span
@@ -75,7 +90,7 @@
       </NuxtLink>
       <NuxtLink
         v-for="item in sortedArray"
-        :key="item.id"
+        :key="item._id || item.id"
         :to="'/' + item.urlName"
         class="nav-icon text-white p-2 group"
         :class="{ 'active-route': route.path === '/' + item.urlName }"
@@ -92,6 +107,9 @@ import { ref, computed } from "vue";
 import { useRoute } from "vue-router";
 import { numberToHexText } from "~/composables/useHeroHelpers";
 
+const { ImageServer } = useAppConfig();
+const imageServer = ImageServer;
+
 interface AccountInfo {
   data: {
     user_template_profile: {
@@ -101,8 +119,11 @@ interface AccountInfo {
           hide?: boolean;
           background_color?: number;
           background_opacity?: number;
+          foreground_color?: number;
+          title?: { hide?: boolean; text?: string; color?: number };
         };
         header_text?: { hide?: boolean; text?: string; color?: number };
+        logo?: { image_url?: string; hide?: boolean };
         font_color?: number;
       };
     };
@@ -119,7 +140,7 @@ const toggleMenu = () => {
 
 const props = defineProps({
   pages_list: {
-    type: Array as () => Array<{ id: number; urlName: string; listName: string; order: number }>,
+    type: Array as () => Array<{ id?: number; _id?: string; urlName: string; listName: string; order: number }>,
     required: true,
   },
 });
@@ -129,8 +150,9 @@ const sortedArray = computed(() => {
   return props.pages_list.slice().sort((a, b) => a.order - b.order);
 });
 
-const headerText = computed(() => accountInfo.value?.data?.user_template_profile?.settings?.header_text);
 const headerSettings = computed(() => accountInfo.value?.data?.user_template_profile?.settings?.header);
+const headerText = computed(() => accountInfo.value?.data?.user_template_profile?.settings?.header_text);
+const headerTitleObj = computed(() => headerSettings.value?.title);
 
 const titleAlignment = computed(() => {
   const alignment = headerSettings.value?.leading_alignment || "start";
@@ -140,19 +162,42 @@ const titleAlignment = computed(() => {
   return "start";
 });
 
+const logoImage = computed(() => {
+  const settings = accountInfo.value?.data?.user_template_profile?.settings;
+  if (settings?.logo?.hide === true) return null;
+  const logoUrl = settings?.logo?.image_url;
+  if (!logoUrl) return null;
+  return imageServer + logoUrl;
+});
+
 const headerVisible = computed(() => {
   if (headerSettings.value?.hide === true) return false;
-  const hasTitle = !!(headerText.value?.text && headerText.value?.hide !== true);
-  if (hasTitle) return true;
+  if (logoImage.value) return true;
+  const titleFromHeader = headerTitleObj.value?.text && headerTitleObj.value?.hide !== true;
+  const titleFromHeaderText = headerText.value?.text && headerText.value?.hide !== true;
+  if (titleFromHeader || titleFromHeaderText) return true;
   if (sortedArray.value.length > 0) return true;
   return false;
 });
 
-const headerTitle = computed(() => headerText.value?.text?.trim() || "QShot");
+const headerTitle = computed(() => {
+  const fromTitle = headerTitleObj.value?.text && headerTitleObj.value?.hide !== true
+    ? headerTitleObj.value.text.trim()
+    : "";
+  if (fromTitle) return fromTitle;
+  const fromHeaderText = headerText.value?.text && headerText.value?.hide !== true
+    ? headerText.value.text.trim()
+    : "";
+  return fromHeaderText || "QShot";
+});
 
 const headerTextColor = computed(() => {
-  const color = headerText.value?.color;
-  if (color != null) return numberToHexText(color);
+  const fromTitle = headerTitleObj.value?.color;
+  if (fromTitle != null) return numberToHexText(fromTitle);
+  const fromHeaderText = headerText.value?.color;
+  if (fromHeaderText != null) return numberToHexText(fromHeaderText);
+  const fg = headerSettings.value?.foreground_color;
+  if (fg != null) return numberToHexText(fg);
   const fontColor = accountInfo.value?.data?.user_template_profile?.settings?.font_color;
   if (fontColor != null) return numberToHexText(fontColor);
   return "rgb(255, 255, 255)";
