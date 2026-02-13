@@ -1,0 +1,123 @@
+{
+    "success": true,
+    "data": {
+        "user_template_profile": {
+            "_id": "698c4a1fe02f662909c31843",
+            "name": "test15",
+            "status": true,
+            "info": {
+                "modules": [
+                    {
+                        "type": "SpacerModule",
+                        "id": "20260212-0921-8e35-a425-d96f6646a117",
+                        "space": 300
+                    },
+                    {
+                        "type": "SpacerModule",
+                        "id": "20260212-0921-8c44-8567-ca6c5f565afa",
+                        "space": 300
+                    }
+                ]
+            },
+            "user": "66d6163f22224329039cf464",
+            "profileTamplate": "6627d338fbcf288835ef634b",
+            "type": "personal",
+            "settings": {
+                "website_name": "Test",
+                "style": "style2",
+                "logo": {
+                    "image_url": "images/profiles66d6163f22224329039cf464__j5u5cydusd.png",
+                    "hide": false
+                },
+                "header_text": {
+                    "hide": false,
+                    "text": "Brand Name",
+                    "color": null
+                },
+                "header": {
+                    "hide": false,
+                    "leading_alignment": "start",
+                    "background_opacity": 1,
+                    "background_color": 4278584838
+                },
+                "profile_picture": {
+                    "image_url": "images/profiles66d6163f22224329039cf464__0cu3xr0v0of9.png",
+                    "image_rect": [
+                        0,
+                        640,
+                        1280,
+                        1920
+                    ],
+                    "hide": false,
+                    "alignment": null,
+                    "shape": null,
+                    "border_width": 0,
+                    "border_color": null
+                },
+                "cover_photo": {
+                    "image_url": "images/profiles66d6163f22224329039cf464__s7othxz007o.png",
+                    "hide": false,
+                    "size": "poster",
+                    "transparency": 0.5069177693139412,
+                    "fade": true
+                },
+                "title": {
+                    "hide": false,
+                    "text": "Write Your Main          Title Here",
+                    "color": 4294967295
+                },
+                "text": {
+                    "hide": false,
+                    "text": "Write Your Main Description or Small Tagline Text Here",
+                    "color": 4294967295
+                },
+                "button1": {
+                    "hide": false,
+                    "text": "Book Now",
+                    "url": null,
+                    "foreground_color": 4280556559,
+                    "background_color": 4289317085
+                },
+                "button2": {
+                    "hide": false,
+                    "text": "Call us",
+                    "url": null,
+                    "foreground_color": 4294967295,
+                    "background_color": 4280573572
+                },
+                "background": {
+                    "color_value": {
+                        "color": "000000",
+                        "type": "solid"
+                    }
+                },
+                "name": {
+                    "text": "",
+                    "alignment": null,
+                    "hide": null,
+                    "color": null
+                },
+                "bio": {
+                    "text": "",
+                    "alignment": null,
+                    "hide": null
+                },
+                "font_family": null,
+                "font_color": null,
+                "can_save_contact": null
+            },
+            "archive": true,
+            "verified": false,
+            "createdAt": "2026-02-11T09:21:35.453Z",
+            "updatedAt": "2026-02-12T09:25:28.806Z",
+            "previousNames": [],
+            "externalDomains": [],
+            "externalDomainStatus": false,
+            "__v": 0
+        },
+        "type": "origin",
+        "pages_list": [],
+        "urlType": "home-page",
+        "plan": "Pro"
+    }
+}

@@ -3,6 +3,8 @@ const url = useRequestURL();
 const { ImageServer } = useAppConfig();
 import { useNuxtApp } from "#app";
 import { sendRedirect } from "h3";
+import HomeHeaderStyle1 from "~/components/home/Header/Style1.vue";
+import HomeHeaderStyle2 from "~/components/home/Header/Style2.vue";
 
 const nuxtApp = useNuxtApp();
 // Helper function to extract subdomain
@@ -137,6 +139,18 @@ const profile = computed(() => data.value?.data?.user_template_profile || null);
 const settings = computed(() => profile.value?.settings || {});
 const backgroundSettings = computed(() => settings.value?.background);
 const pagesList = computed(() => data.value?.data?.pages_list || []);
+
+// نفس هيدر الستايل المستخدم في الصفحة الرئيسية
+const heroStyle = computed(() => settings.value?.style || "style1");
+const headerComponents = {
+  style1: HomeHeaderStyle1,
+  style2: HomeHeaderStyle2,
+};
+const headerComponent = computed(
+  () => headerComponents[heroStyle.value] || HomeHeaderStyle1
+);
+const headerProps = computed(() => ({ pages_list: pagesList.value }));
+
 const seoImageUrl = computed(() => {
   if (!seoMeta.value.image || seoMeta.value.image === '/logo-only.svg') {
     return seoMeta.value.image || '/logo-only.svg';
@@ -302,7 +316,7 @@ if (seoMeta.value.image) {
       { '--page-font-color': pageFontColorRgb }
     ]"
   >
-    <HomeNavbar :pages_list="pagesList"></HomeNavbar>
+    <component :is="headerComponent" v-bind="headerProps" />
     <!-- grid -->
     <!-- <div
       class="pointer-events-none absolute inset-0 bg-center bg-grid-white/10 bg-grid-16 [mask-image:radial-gradient(white,transparent_85%)]"

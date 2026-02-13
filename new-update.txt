@@ -1,0 +1,138 @@
+enum HeroStyle {
+  style2(
+    hasProfileImage: false,
+    hasHeaderLogo: true,
+    hasHeaderTitle: true,
+    hasTitle: true,
+    hasText: true,
+    hasButton1: true,
+    hasButton2: true,
+    hasHeaderTransparency: false,
+    headerFloating: false,
+    headerHeight: 72,
+    headerPadding: EdgeInsets.symmetric(horizontal: 20),
+    coverSizeWhitelist: [CoverPhotoSize.poster, CoverPhotoSize.vertical],
+    defaultCoverPhoto: CoverPhoto(
+      imageUrl: "images/profiles66e82ba1d80321e93e437972__xhl5id66tos.png",
+      hide: false,
+      fade: false,
+      size: CoverPhotoSize.poster,
+      transparency: 1,
+    ),
+    defaultHeader: Header(
+      hide: false,
+      title: HeroText(hide: false, text: "QShot"),
+      leadingAlignment: ImageAlignment.start,
+      backgroundOpacity: 1.0,
+    ),
+    defaultLogo: Logo(hide: true),
+    defaultTitle: HeroText(
+      hide: false,
+      text: "Write Your Main Title or Heading Text Here",
+      color: kDefaultColor,
+    ),
+    titleStyle: TextStyle(fontSize: 36, fontWeight: FontWeight.w900),
+    defaultText: HeroText(
+      hide: false,
+      text: "Write Your Main Description or Small Tagline Text Here",
+      color: kDefaultColor,
+    ),
+    textStyle: TextStyle(fontSize: 14),
+    defaultButton1: Button(
+      hide: false,
+      text: "Book Now",
+      backgroundColor: Color(0xFFAEC7DB),
+      foregroundColor: Color(0xFF241C0F),
+      url: Links.websiteUrl,
+    ),
+    defaultButton2: Button(
+      hide: false,
+      text: "Call us",
+      backgroundColor: Color(0xFF345D80),
+      foregroundColor: Colors.white,
+      url: Links.websiteUrl,
+    ),
+  ),
+  style1(
+    hasProfileImage: true,
+    hasHeaderLogo: true,
+    hasHeaderTitle: false,
+    hasTitle: false,
+    hasText: false,
+    hasButton1: false,
+    hasButton2: false,
+    hasHeaderTransparency: true,
+    headerFloating: true,
+    headerHeight: 44,
+    headerPadding: EdgeInsets.symmetric(horizontal: 5),
+    coverSizeWhitelist: CoverPhotoSize.values,
+    defaultPicture: ProfilePicture(
+      hide: false,
+      alignment: ImageAlignment.center,
+      shape: ImageShape.circle,
+      borderColor: kDefaultColor,
+      borderWidth: 0.0,
+    ),
+    defaultCoverPhoto: CoverPhoto(
+      hide: false,
+      size: CoverPhotoSize.horizontal,
+      fade: false,
+      transparency: 1,
+    ),
+    defaultHeader: Header(
+      hide: false,
+      title: HeroText(hide: false, text: "QShot"),
+      leadingAlignment: ImageAlignment.start,
+      backgroundOpacity: 1.0,
+    ),
+    defaultLogo: Logo(hide: true),
+  );
+
+  final bool hasProfileImage;
+  final bool hasHeaderLogo;
+  final bool hasHeaderTitle;
+  final bool hasTitle;
+  final bool hasText;
+  final bool hasButton1;
+  final bool hasButton2;
+  final bool hasHeaderTransparency;
+  final bool headerFloating;
+  final double headerHeight;
+  final EdgeInsets headerPadding;
+  final List<CoverPhotoSize> coverSizeWhitelist;
+  final ProfilePicture? defaultPicture;
+  final CoverPhoto? defaultCoverPhoto;
+  final Header? defaultHeader;
+  final Logo? defaultLogo;
+  final HeroText? defaultTitle;
+  final TextStyle? titleStyle;
+  final HeroText? defaultText;
+  final TextStyle? textStyle;
+  final Button? defaultButton1;
+  final Button? defaultButton2;
+
+  const HeroStyle({
+    required this.hasProfileImage,
+    required this.hasHeaderLogo,
+    required this.hasHeaderTitle,
+    required this.hasTitle,
+    required this.hasText,
+    required this.hasButton1,
+    required this.hasButton2,
+    required this.hasHeaderTransparency,
+    required this.headerFloating,
+    required this.headerHeight,
+    required this.headerPadding,
+    required this.coverSizeWhitelist,
+    this.defaultPicture,
+    this.defaultCoverPhoto,
+    this.defaultHeader,
+    this.defaultLogo,
+    this.defaultTitle,
+    this.titleStyle,
+    this.defaultText,
+    this.textStyle,
+    this.defaultButton1,
+    this.defaultButton2,
+  });
+}

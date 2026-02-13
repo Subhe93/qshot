@@ -3,6 +3,10 @@ const url = useRequestURL();
 const { ImageServer } = useAppConfig();
 import { useNuxtApp } from "#app";
 import { sendRedirect } from "h3";
+import HomeHeroStyle1 from "~/components/home/Hero/Style1.vue";
+import HomeHeroStyle2 from "~/components/home/Hero/Style2.vue";
+import HomeHeaderStyle1 from "~/components/home/Header/Style1.vue";
+import HomeHeaderStyle2 from "~/components/home/Header/Style2.vue";
 
 const nuxtApp = useNuxtApp();
 // Helper function to extract subdomain
@@ -125,13 +129,40 @@ if (subdomainName) {
 // Computed properties لتسهيل الوصول للبيانات (يجب تعريفها قبل الدوال التي تستخدمها)
 const profile = computed(() => data.value?.data?.user_template_profile || null);
 const settings = computed(() => profile.value?.settings || {});
-const coverPhoto = computed(() => settings.value?.cover_photo);
 const profilePicture = computed(() => settings.value?.profile_picture);
 const nameSettings = computed(() => settings.value?.name);
 const bioSettings = computed(() => settings.value?.bio);
 const backgroundSettings = computed(() => settings.value?.background);
 const headerSettings = computed(() => settings.value?.header);
 const pagesList = computed(() => data.value?.data?.pages_list || []);
+
+// Hero style: style1 (default) | style2 — component chosen per settings.style (SSR-safe)
+const heroStyle = computed(() => settings.value?.style || "style1");
+const heroComponents = {
+  style1: HomeHeroStyle1,
+  style2: HomeHeroStyle2,
+};
+const heroComponent = computed(
+  () => heroComponents[heroStyle.value] || HomeHeroStyle1
+);
+const heroProps = computed(() => ({
+  profile: profile.value,
+  settings: settings.value,
+  imageServer,
+  textColor: textColor.value,
+}));
+
+// Header per style (SSR-safe)
+const headerComponents = {
+  style1: HomeHeaderStyle1,
+  style2: HomeHeaderStyle2,
+};
+const headerComponent = computed(
+  () => headerComponents[heroStyle.value] || HomeHeaderStyle1
+);
+const headerProps = computed(() => ({
+  pages_list: pagesList.value,
+}));
 
 //load font
 const fontName = computed(() => settings.value?.font_family || 'Inter');
@@ -224,83 +255,6 @@ function generateBackgroundColor(colorValue) {
   }
 }
 
-function getCoverPhotoAspectRatio(coverPhoto) {
-  if (!coverPhoto) return 'aspect-ratio: 16 / 9;';
-  
-  const shape = coverPhoto.shape;
-  const size = coverPhoto.size;
-  
-  if (shape === 'horizontal' || (!shape && size === 'horizontal')) {
-    return 'aspect-ratio: 16 / 9;';
-  } else if (shape === 'square' || (!shape && size === 'square')) {
-    return 'aspect-ratio: 1 / 1;'; // مربع حسب عرض الشاشة
-  } else if (shape === 'poster' || (!shape && size === 'poster')) {
-    return 'aspect-ratio: 4 / 5;';
-  } else if (shape === 'vertical' || (!shape && size === 'vertical')) {
-    return 'aspect-ratio: 9 / 16;';
-  } else {
-    // الافتراضي horizontal إذا كانت shape و size كلاهما null
-    return 'aspect-ratio: 16 / 9;';
-  }
-}
-
-function getProfilePicturePosition(coverPhoto, alignment) {
-  const basePosition = {
-    position: 'absolute',
-    'z-index': 10
-  };
-  
-  // تحديد المحاذاة
-  if (alignment === 'center' || !alignment) {
-    basePosition.left = '50%';
-    basePosition.transform = 'translateX(-50%)';
-  } else if (alignment === 'start' || alignment === 'left') {
-    basePosition.left = '1.25rem';
-    basePosition.transform = 'none';
-  } else if (alignment === 'end' || alignment === 'right') {
-    basePosition.right = '1.25rem';
-    basePosition.left = 'auto';
-    basePosition.transform = 'none';
-  }
-  
-  if (!coverPhoto || !coverPhoto.image_url || coverPhoto.hide === true) {
-    // الافتراضي horizontal: الصورة الشخصية نصفها فوق cover photo والنصف الآخر أسفله  
-    return {
-      ...basePosition,
-      bottom: 'calc(-1 * clamp(52px, 5vw, 80px))' // نصف ارتفاع الصورة (responsive) - سالب ليظهر خارج cover photo
-    };
-  }
-  
-  const shape = coverPhoto.shape;
-  const size = coverPhoto.size;
-  
-  // إذا كان horizontal، الصورة الشخصية نصفها فوق cover photo والنصف الآخر أسفله
-  // بما أن الصورة الآن داخل cover photo container، نضعها في أسفل container بحيث نصفها يظهر خارج cover photo
-  if (shape === 'horizontal' || (!shape && size === 'horizontal')) {
-    // الصورة الشخصية حجمها متغير: 104px على الشاشات الصغيرة، 160px على الشاشات الكبيرة
-    // نصفها = 52px على الشاشات الصغيرة، 80px على الشاشات الكبيرة
-    // نضعها في أسفل cover photo container بحيث نصفها يظهر خارج cover photo
-    return {
-      ...basePosition,
-      bottom: 'calc(-1 * clamp(52px, 5vw, 80px))' // نصف ارتفاع الصورة (responsive) - سالب ليظهر خارج cover photo
-    };
-  } else if (shape === 'square' || (!shape && size === 'square') || shape === 'poster' || (!shape && size === 'poster') || shape === 'vertical' || (!shape && size === 'vertical')) {
-    // عندما يكون square أو poster أو vertical، الصورة الشخصية في المنتصف تماماً (أفقي وعمودي)
-    return {
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      'z-index': 10
-    };
-  } else {
-    // للحالات الأخرى، تبقى absolute في موضعها الطبيعي داخل cover photo
-    return {
-      ...basePosition,
-      bottom: '2rem'
-    };
-  }
-}
 function updateStyles(bgColor, textColor) {
   // لون النص يُطبَّق عبر متغير CSS --page-font-color على الـ section (لا نعتمد على querySelectorAll لتفادي مشكلة توقيت ClientOnly)
   if (!backgroundSettings.value?.image) {
@@ -423,134 +377,13 @@ if (profileImage.value && profileImage.value !== '/logo-only.svg') {
       { '--page-font-color': pageFontColorRgb }
     ]"
   >
-    <!-- Cover Photo -->
-    <div
-      v-if="coverPhoto?.hide !== true"
-      class="w-full z-0 relative"
-      :style="`
-        ${getCoverPhotoAspectRatio(coverPhoto)}
-        ${(!coverPhoto?.shape || coverPhoto?.shape === 'horizontal' || (!coverPhoto?.shape && coverPhoto?.size === 'horizontal')) ? 'margin-bottom: clamp(4rem, 3vw, 2rem);' : ''}
-      `"
-    >
-      <!-- Cover Photo Background with Mask -->
-      <div
-        v-if="coverPhoto?.image_url"
-        class="absolute inset-0 w-full h-full"
-        :style="`
-          background-image: url(${imageServer}${coverPhoto.image_url});
-          background-size: cover;
-          background-position: center;
-          background-repeat: no-repeat;
-          opacity: ${coverPhoto.transparency || 1};
-          ${coverPhoto.fade ? 'mask-image: linear-gradient(to bottom, black, transparent);' : ''}
-          z-index: 0;
-        `"
-      ></div>
-   
-      <div
-        v-else
-        class="absolute inset-0 w-full h-full bg-transparent"
-        style="z-index: 0;"
-      ></div>
-      
-      <!-- Profile Picture - outside mask (when cover is visible)؛ إخفاء عند عدم توفر صورة -->
-      <div
-        v-if="profilePicture?.hide !== true && (profilePicture?.image_url || settings?.logo?.image_url)"
-        class="inline-block"
-        :class="{
-          'rounded-full': (profilePicture?.shape || 'circle') === 'circle',
-          'rounded-lg': profilePicture?.shape === 'rectangle',
-          'rounded-lg': profilePicture?.shape === 'square'
-        }"
-        :style="{
-          ...getProfilePicturePosition(coverPhoto, profilePicture?.alignment),
-          border: profilePicture?.border_width ? `${profilePicture.border_width}px solid ${profilePicture.border_color ? numberToHexText(profilePicture.border_color) : 'transparent'}` : undefined
-        }"
-      >
-        <HomeProfilePicture
-          :image="(profilePicture?.image_url ? imageServer + profilePicture.image_url : (settings?.logo?.image_url ? imageServer + settings.logo.image_url : '/person.svg'))"
-          :shape="profilePicture?.shape || 'circle'"
-        />
-      </div>
-    </div>
-    <!-- عندما الكفر مخفي: نحافظ على نفس ارتفاع horizontal حتى لو الصورة الشخصية مخفية -->
-    <div
-      v-else
-      class="w-full z-0 relative"
-      style="aspect-ratio: 22 / 9; margin-bottom: clamp(4rem, 3vw, 2rem);"
-    >
-      <div
-        v-if="profilePicture?.hide !== true && (profilePicture?.image_url || settings?.logo?.image_url)"
-        class="inline-block absolute"
-        :class="{
-          'rounded-full': (profilePicture?.shape || 'circle') === 'circle',
-          'rounded-lg': profilePicture?.shape === 'rectangle',
-          'rounded-lg': profilePicture?.shape === 'square'
-        }"
-        :style="{
-          ...getProfilePicturePosition(null, profilePicture?.alignment),
-          ...(profilePicture?.border_width ? { border: `${profilePicture.border_width}px solid ${profilePicture.border_color ? numberToHexText(profilePicture.border_color) : 'transparent'}` } : {})
-        }"
-      >
-        <HomeProfilePicture
-          :image="(profilePicture?.image_url ? imageServer + profilePicture.image_url : (settings?.logo?.image_url ? imageServer + settings.logo.image_url : '/person.svg'))"
-          :shape="profilePicture?.shape || 'circle'"
-        />
-      </div>
-    </div>
-    
-    <HomeNavbar :pages_list="pagesList"></HomeNavbar>
-    <!-- grid -->
-    <!-- <div
-      class="pointer-events-none absolute inset-0 bg-center bg-grid-white/10 bg-grid-16 [mask-image:radial-gradient(white,transparent_85%)]"
-    /> -->
-
+    <component :is="heroComponent" v-bind="heroProps" />
+    <component :is="headerComponent" v-bind="headerProps" />
     <div class="relative mx-auto flex max-w-7xl flex-col justify-center gap-4">
-      <!-- spotlight -->
       <div
         class="absolute -top-8 left-1/2 size-72 -translate-x-1/2 rounded-full bg-white/25 blur-[120px] lg:-top-8 lg:size-[32rem] lg:blur-[200px]"
       />
-
       <div class="relative w-full">
-        <!-- Profile Picture Container -->
-       
-        
-        <!-- Name and Bio Container -->
-        <div class="pl-5 pr-5">
-          <h1
-            v-if="nameSettings?.hide !== true && nameSettings?.text"
-            class="name_text text-6xl pt-4"
-            :class="{
-              'text-center': !nameSettings?.alignment || nameSettings?.alignment === 'center',
-              'text-left': nameSettings?.alignment === 'start' || nameSettings?.alignment === 'left',
-              'text-right': nameSettings?.alignment === 'end' || nameSettings?.alignment === 'right'
-            }"
-            :style="`color: ${numberToHexText(nameSettings?.color != null ? nameSettings.color : (textColor ?? 16777215))} !important;`"
-          >
-            {{ nameSettings.text }}
-            <NuxtImg
-              v-if="profile?.verified"
-              class="h-4 w-4 verified"
-              src="/verified_badge.svg"
-            ></NuxtImg>
-          </h1>
-          <h2
-            v-if="(typeof bioSettings === 'string' ? bioSettings : bioSettings?.text) && bioSettings?.hide !== true"
-            class="bio_text text-2xl text-center pr-4 pl-4 pt-4"
-            :style="`color: ${numberToHexText((typeof bioSettings === 'object' && bioSettings?.color != null) ? bioSettings.color : (textColor ?? 16777215))} !important;`"
-          >
-            <span
-              v-html="
-                (typeof bioSettings === 'string' 
-                  ? bioSettings 
-                  : bioSettings?.text || '').replace(
-                  /\n/g,
-                  '<br />'
-                )
-              "
-            ></span>
-          </h2>
-        </div>
         <ClientOnly>
           <!-- <HomeSocial
             :socials="profile?.info?.social_links"
@@ -578,31 +411,5 @@ if (profileImage.value && profileImage.value !== '/logo-only.svg') {
 .hero-bg {
   color: var(--page-font-color);
   color-scheme: normal;
-}
-.bio_text {
-  opacity: 0.8;
-}
-.verified {
-  display: inline-block;
-  /* vertical-align: baseline; */
-  transform: scale(2);
-  margin-bottom: 2px;
-}
-@media (max-width: 991px) {
-  .name_text {
-    /* font-size: calc(30px - 20%); */
-    /* font-size: calc(4vw + 5px); */
-    font-size: 24px;
-  }
-  .bio_text {
-    font-size: 16px;
-    /* font-size: calc(20px - 20%); */
-  }
-  .verified {
-    display: inline-block;
-    /* vertical-align: bottom; */
-    transform: scale(1.2);
-    margin-bottom: 2px;
-  }
 }
 </style>
