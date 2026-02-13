@@ -144,7 +144,12 @@ const bioHtml = computed(() => {
     </h1>
     <h2
       v-if="(typeof bioSettings === 'string' ? bioSettings : bioSettings?.text) && (typeof bioSettings !== 'object' || bioSettings?.hide !== true)"
-      class="bio_text text-2xl text-center pr-4 pl-4 pt-4"
+      class="bio_text text-2xl pr-4 pl-4 pt-4"
+      :class="{
+        'text-center': typeof bioSettings !== 'object' || !bioSettings?.alignment || bioSettings?.alignment === 'center',
+        'text-left': typeof bioSettings === 'object' && (bioSettings?.alignment === 'start' || bioSettings?.alignment === 'left'),
+        'text-right': typeof bioSettings === 'object' && (bioSettings?.alignment === 'end' || bioSettings?.alignment === 'right')
+      }"
       :style="`color: ${bioColorRgb} !important;`"
     >
       <span v-html="bioHtml" />

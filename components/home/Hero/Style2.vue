@@ -158,6 +158,11 @@ const isCoverVertical = computed(() => {
     <div
       v-if="(typeof bioSettings === 'string' ? bioSettings : bioSettings?.text) && (typeof bioSettings !== 'object' || bioSettings?.hide !== true)"
       class="bio_text text-lg md:text-xl opacity-80"
+      :class="{
+        'text-center': typeof bioSettings !== 'object' || !bioSettings?.alignment || bioSettings?.alignment === 'center',
+        'text-left': typeof bioSettings === 'object' && (bioSettings?.alignment === 'start' || bioSettings?.alignment === 'left'),
+        'text-right': typeof bioSettings === 'object' && (bioSettings?.alignment === 'end' || bioSettings?.alignment === 'right')
+      }"
       :style="`color: ${bioColorRgb} !important;`"
     >
       <span v-html="bioHtml" />
