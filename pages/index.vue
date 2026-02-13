@@ -21,7 +21,7 @@ function getSubdomain() {
   if (host === "qshot.com") {
     return "qshot.qshot.com";
   } else {
-    return getUpdatedUrl();
+    // return getUpdatedUrl();
     // معالجة مؤقتة: تحويل quazax.com إلى qshot.com
     if (host.includes("quazax.com")) {
       return host.replace("quazax.com", "speaknet.app");
