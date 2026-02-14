@@ -23,9 +23,9 @@ function getSubdomain() {
   } else {
     //  return getUpdatedUrl();
     // معالجة مؤقتة: تحويل quazax.com إلى qshot.com
-    if (host.includes("quazax.com")) {
-      return host.replace("quazax.com", "speaknet.app");
-    }
+    // if (host.includes("quazax.com")) {
+    //   return host.replace("quazax.com", "speaknet.app");
+    // }
     return host;
   }
 }
