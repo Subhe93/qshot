@@ -21,7 +21,7 @@ function getSubdomain() {
   } else {
     // return getUpdatedUrl();
     if (host.includes("quazax.com")) {
-      return host.replace("quazax.com", "speaknet.app");
+      return host.replace("quazax.com", "speaknet.app") + url.pathname;
     }
     return host + url.pathname;
   }
