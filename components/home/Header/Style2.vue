@@ -140,14 +140,15 @@ const toggleMenu = () => {
 
 const props = defineProps({
   pages_list: {
-    type: Array as () => Array<{ id?: number; _id?: string; urlName: string; listName: string; order: number }>,
+    type: Array as () => Array<{ id?: number; _id?: string; urlName: string; listName: string; order: number; listViewStatus?: boolean }>,
     required: true,
   },
 });
 
 const sortedArray = computed(() => {
   if (!props.pages_list || props.pages_list.length === 0) return [];
-  return props.pages_list.slice().sort((a, b) => a.order - b.order);
+  const visible = props.pages_list.filter((p) => p.listViewStatus !== false);
+  return visible.slice().sort((a, b) => a.order - b.order);
 });
 
 const headerSettings = computed(() => accountInfo.value?.data?.user_template_profile?.settings?.header);
