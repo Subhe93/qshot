@@ -50,7 +50,7 @@ const seoMeta = ref({});
 if (subdomainName) {
   // Construct the URL with query parameters
   const params = new URLSearchParams({ name: subdomainName });
-  const url = `https://api.speaknet.app/q-profile/user/test?${params.toString()}`;
+  const url = `https://qshot.radiolingo.app/q-profile/user/test?${params.toString()}`;
 
   // Perform the fetch request
   const { data: fetchedData } = await useFetch(url, {
